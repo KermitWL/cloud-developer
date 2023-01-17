@@ -16,15 +16,49 @@ router.get('/', async (req: Request, res: Response) => {
     res.send(items);
 });
 
-//@TODO
-//Add an endpoint to GET a specific resource by Primary Key
+//GET a specific resource by Primary Key
+router.get('/:id', async (req: Request, res: Response) => {
+    let { id } = req.params;
+    if (!id) {
+        res.status(400).send("ID not set");
+        return;
+    }
+    const item = FeedItem.findByPk(id);
+    if (!item) {
+        res.status(400).send("ID does not exist");
+        return;
+    }
+    res.status(200).send(item);
+});
 
 // update a specific resource
 router.patch('/:id', 
     requireAuth, 
     async (req: Request, res: Response) => {
-        //@TODO try it yourself
-        res.status(500).send("not implemented")
+        let { id } = req.params;
+        if (!id) {
+            res.status(400).send("ID not set");
+            return;
+        }
+        const item = FeedItem.findByPk(id);
+        if (!item) {
+            res.status(400).send("ID does not exist");
+            return;
+        }
+        let updatedItem = req.body;
+        if (!updatedItem) {
+            res.status(400).send("no updated item");
+            return;
+        }
+        FeedItem.update({
+            caption: updatedItem.caption,
+            url: updatedItem.url
+        }, {
+            where: {
+                id: id
+            }
+        });
+        res.status(200).send("done");
 });
 
 
