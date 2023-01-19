@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { readdirSync } from "fs";
 import Jimp = require("jimp");
 
 // filterImageFromURL
@@ -36,4 +36,18 @@ export async function deleteLocalFiles(files: Array<string>) {
   for (let file of files) {
     fs.unlinkSync(file);
   }
+}
+
+// deleteAllLocalFiles
+// helper function to delete files on the local disk
+// useful to cleanup after tasks
+// INPUTS
+//    files: Array<string> an array of absolute paths to files
+export async function deleteAllLocalFiles() {
+  
+  const outpath = "/tmp/";
+  const tempFiles = readdirSync(__dirname + outpath);
+  console.log(tempFiles);
+  deleteLocalFiles(tempFiles);
+  
 }
