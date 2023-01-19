@@ -20,10 +20,10 @@ import { URL } from 'url';
   // delete all temp files on finishing a response
   app.use(function(req, res, next){
     res.on('finish', function() {
-      const outpath = "/util/tmp/";
-      const tempFiles = readdirSync(__dirname + outpath);
+      const outpath = __dirname + "/util/tmp/";
+      const tempFiles = readdirSync(outpath);
       for (var i = 0; i < tempFiles.length; i++) {
-        tempFiles[i] = __dirname + outpath + tempFiles[i];
+        tempFiles[i] = outpath + tempFiles[i];
       } 
       deleteLocalFiles(tempFiles);
     });
@@ -49,6 +49,7 @@ import { URL } from 'url';
     try {
       filteredImage = await filterImageFromURL(imageURL.toString());
     } catch (error) {
+      console.log(error);
       res.status(400).send("could not get image from url " + imageURL);
       return;
     }

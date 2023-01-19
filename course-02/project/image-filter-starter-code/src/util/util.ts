@@ -37,17 +37,3 @@ export async function deleteLocalFiles(files: Array<string>) {
     fs.unlinkSync(file);
   }
 }
-
-// deleteAllLocalFiles
-// helper function to delete files on the local disk
-// useful to cleanup after tasks
-// INPUTS
-//    files: Array<string> an array of absolute paths to files
-export async function deleteAllLocalFiles() {
-  
-  const outpath = "/tmp/";
-  const tempFiles = readdirSync(__dirname + outpath);
-  console.log(tempFiles);
-  deleteLocalFiles(tempFiles);
-  
-}
