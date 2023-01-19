@@ -1,6 +1,7 @@
 import express from 'express';
+import { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { filterImageFromURL, deleteLocalFiles } from './util/util';
 import { readdirSync } from 'fs';
 import { URL } from 'url';
 
@@ -18,10 +19,10 @@ import { URL } from 'url';
 
 
   // delete all temp files on finishing a response
-  app.use(function(req, res, next){
+  app.use(function(req: Request, res: Response, next: NextFunction){
     res.on('finish', function() {
-      const outpath = __dirname + "/util/tmp/";
-      const tempFiles = readdirSync(outpath);
+      const outpath: string = __dirname + "/util/tmp/";
+      const tempFiles: string[] = readdirSync(outpath);
       for (var i = 0; i < tempFiles.length; i++) {
         tempFiles[i] = outpath + tempFiles[i];
       } 
@@ -31,8 +32,8 @@ import { URL } from 'url';
   });
 
   // image filtering
-  app.get('/filteredimage/', async (req, res) => {
-    let imageURL = req.query["image_url"];
+  app.get('/filteredimage/', async (req: Request, res: Response) => {
+    let imageURL : string = req.query["image_url"].toString();
     if (!imageURL) {
         res.status(400).send("image_url not set");
         return;
@@ -41,7 +42,7 @@ import { URL } from 'url';
     try {
       const testURL = new URL(imageURL.toString());
     } catch (error) {
-      res.status(400).send("no valid url");
+      res.status(400).send("not a valid url: " + imageURL);
       return;
     }
 
@@ -62,13 +63,10 @@ import { URL } from 'url';
     res.status(200).sendFile(filteredImage);
 });
 
-  /**************************************************************************** */
-
-  //! END @TODO1
   
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
+  app.get( "/", async ( req: Request, res: Response ) => {
     res.send("try GET /filteredimage?image_url={{}}")
   } );
   
