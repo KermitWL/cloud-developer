@@ -5,10 +5,14 @@
     "properties": {
       "title": {
         "type": "string"
+      },
+      "groupId": {
+        "type": "string"
       }
     },
     "required": [
-      "title"
+      "title",
+      "groupId"
     ],
     "additionalProperties": false
 }

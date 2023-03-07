@@ -1,19 +1,34 @@
 import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
 import 'source-map-support/register'
-import * as middy from 'middy'
-import { secretsManager } from 'middy/middlewares'
 
 import { verify } from 'jsonwebtoken'
 import { JwtToken } from '../../auth/JwtToken'
 
-const secretId = process.env.AUTH_0_SECRET_ID
-const secretField = process.env.AUTH_0_SECRET_FIELD
+const cert = "-----BEGIN CERTIFICATE-----\n" +
+"MIIDHTCCAgWgAwIBAgIJVdW8IcN4Zlz/MA0GCSqGSIb3DQEBCwUAMCwxKjAoBgNV\n" +
+"BAMTIWRldi1tM3U1amFhdm8wd24xNmg1LnVzLmF1dGgwLmNvbTAeFw0yMzAzMDUy\n" +
+"MDIxNTVaFw0zNjExMTEyMDIxNTVaMCwxKjAoBgNVBAMTIWRldi1tM3U1amFhdm8w\n" +
+"d24xNmg1LnVzLmF1dGgwLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC\n" +
+"ggEBANE+Z+bkiUQNmDq/xlEbPeI/dENTwIhFfLaZEOuV2tyQNKehCZS/f4SU1OCE\n" +
+"67WPmws7aQt/fZHuxloNyINZrRqsExti9NG4hPxGapPTThT1NYF/SnbejqyBDnEY\n" +
+"QKsnBTz/hJkHvizd3izX+Ws0wn9XvYirXGXOhCPR5/xIlcqX0Lij2ayUT/KJ0xL+\n" +
+"P/eGWItgqg7Kr6htyEKDgYrq8z6Am5FfKUbfmgoXaTzSehAnO59dn9lVvIaEUby3\n" +
+"8qfLCnRbxl5nd/PgBMb5Vv9oUbsM2wHHpaP071mGvXdhlfEbEZjqOqkCNeiJrEtG\n" +
+"KYCubFv8/VikonnEJ1Xykg4aW+0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAd\n" +
+"BgNVHQ4EFgQUPsIHXfk35jcwa76ljjn6dsPk4kMwDgYDVR0PAQH/BAQDAgKEMA0G\n" +
+"CSqGSIb3DQEBCwUAA4IBAQAcjAUXRMa5GARL1NokWAJuPkSferoswZBi+NVoHMQW\n" +
+"Ak7ttgKsjJO4Y4FDt2Egpx4dPW6ixhyqYIJs8wmVEGppTTPEjmrUmwyS9VymVQ1S\n" +
+"Se2xBjeitJr91CUmWkwsi6V9pTsuozjZTe0fwNHH7WNxFns8vEnV/yxACsE27MQ6\n" +
+"oieAln3u92EAl7MPgezo/1H4Y63Jh3ze0uJ1lCutrBISIFMmMfISW2/b2bb6QVQd\n" +
+"6RRm4wMotPzC0x4TF30NfDUoRVyiDU2dHe1L/G5dsbwV4Su7SaFwBzMMLAmMnWBq\n" +
+"6hTxB0kI0d2qXqGl0y9vLXddjC1Bz37Ka0x4c48m+2xp\n" +
+"-----END CERTIFICATE-----"
 
-export const handler = middy(async (event: CustomAuthorizerEvent, context): Promise<CustomAuthorizerResult> => {
+export const handler = async (event: CustomAuthorizerEvent): Promise<CustomAuthorizerResult> => {
   try {
     const decodedToken = verifyToken(
       event.authorizationToken,
-      context.AUTH0_SECRET[secretField]
+      cert
     )
     console.log('User was authorized', decodedToken)
 
@@ -47,9 +62,9 @@ export const handler = middy(async (event: CustomAuthorizerEvent, context): Prom
       }
     }
   }
-})
+}
 
-function verifyToken(authHeader: string, secret: string): JwtToken {
+function verifyToken(authHeader: string, cert: string): JwtToken {
   if (!authHeader)
     throw new Error('No authentication header')
 
@@ -59,17 +74,6 @@ function verifyToken(authHeader: string, secret: string): JwtToken {
   const split = authHeader.split(' ')
   const token = split[1]
 
-  return verify(token, secret) as JwtToken
+  return verify(token, cert, { algorithms: ['RS256'] }) as JwtToken
 }
 
-handler.use(
-  secretsManager({
-    cache: true,
-    cacheExpiryInMillis: 60000,
-    // Throw an error if can't read the secret
-    throwOnFailedCall: true,
-    secrets: {
-      AUTH0_SECRET: secretId
-    }
-  })
-)
