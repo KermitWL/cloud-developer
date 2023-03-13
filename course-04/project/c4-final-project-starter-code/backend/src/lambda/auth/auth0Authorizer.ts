@@ -1,18 +1,38 @@
 import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
 import 'source-map-support/register'
 
-import { verify, decode } from 'jsonwebtoken'
+//import { verify, decode } from 'jsonwebtoken'
+import { verify } from 'jsonwebtoken'
 import { createLogger } from '../../utils/logger'
-import Axios from 'axios'
-import { Jwt } from '../../auth/Jwt'
+//import Axios from 'axios'
+//import { Jwt } from '../../auth/Jwt'
 import { JwtPayload } from '../../auth/JwtPayload'
 
 const logger = createLogger('auth')
+const cert = `-----BEGIN CERTIFICATE-----
+MIIDHTCCAgWgAwIBAgIJVdW8IcN4Zlz/MA0GCSqGSIb3DQEBCwUAMCwxKjAoBgNV
+BAMTIWRldi1tM3U1amFhdm8wd24xNmg1LnVzLmF1dGgwLmNvbTAeFw0yMzAzMDUy
+MDIxNTVaFw0zNjExMTEyMDIxNTVaMCwxKjAoBgNVBAMTIWRldi1tM3U1amFhdm8w
+d24xNmg1LnVzLmF1dGgwLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+ggEBANE+Z+bkiUQNmDq/xlEbPeI/dENTwIhFfLaZEOuV2tyQNKehCZS/f4SU1OCE
+67WPmws7aQt/fZHuxloNyINZrRqsExti9NG4hPxGapPTThT1NYF/SnbejqyBDnEY
+QKsnBTz/hJkHvizd3izX+Ws0wn9XvYirXGXOhCPR5/xIlcqX0Lij2ayUT/KJ0xL+
+P/eGWItgqg7Kr6htyEKDgYrq8z6Am5FfKUbfmgoXaTzSehAnO59dn9lVvIaEUby3
+8qfLCnRbxl5nd/PgBMb5Vv9oUbsM2wHHpaP071mGvXdhlfEbEZjqOqkCNeiJrEtG
+KYCubFv8/VikonnEJ1Xykg4aW+0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAd
+BgNVHQ4EFgQUPsIHXfk35jcwa76ljjn6dsPk4kMwDgYDVR0PAQH/BAQDAgKEMA0G
+CSqGSIb3DQEBCwUAA4IBAQAcjAUXRMa5GARL1NokWAJuPkSferoswZBi+NVoHMQW
+Ak7ttgKsjJO4Y4FDt2Egpx4dPW6ixhyqYIJs8wmVEGppTTPEjmrUmwyS9VymVQ1S
+Se2xBjeitJr91CUmWkwsi6V9pTsuozjZTe0fwNHH7WNxFns8vEnV/yxACsE27MQ6
+oieAln3u92EAl7MPgezo/1H4Y63Jh3ze0uJ1lCutrBISIFMmMfISW2/b2bb6QVQd
+6RRm4wMotPzC0x4TF30NfDUoRVyiDU2dHe1L/G5dsbwV4Su7SaFwBzMMLAmMnWBq
+6hTxB0kI0d2qXqGl0y9vLXddjC1Bz37Ka0x4c48m+2xp
+-----END CERTIFICATE-----`
 
-// TODO: Provide a URL that can be used to download a certificate that can be used
+// Done TODO: Provide a URL that can be used to download a certificate that can be used
 // to verify JWT token signature.
 // To get this URL you need to go to an Auth0 page -> Show Advanced Settings -> Endpoints -> JSON Web Key Set
-const jwksUrl = '...'
+//const jwksUrl = 'https://dev-m3u5jaavo0wn16h5.us.auth0.com/.well-known/jwks.json'
 
 export const handler = async (
   event: CustomAuthorizerEvent
@@ -56,12 +76,12 @@ export const handler = async (
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const token = getToken(authHeader)
-  const jwt: Jwt = decode(token, { complete: true }) as Jwt
+//  const jwt: Jwt = decode(token, { complete: true }) as Jwt
 
   // TODO: Implement token verification
   // You should implement it similarly to how it was implemented for the exercise for the lesson 5
   // You can read more about how to do this here: https://auth0.com/blog/navigating-rs256-and-jwks/
-  return undefined
+  return verify(token, cert, { algorithms: ['RS256'] }) as JwtPayload
 }
 
 function getToken(authHeader: string): string {
