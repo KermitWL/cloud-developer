@@ -16,7 +16,8 @@ const logger = createLogger('TodosAccess')
 export class TodosAccess {
     constructor(
         private readonly docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient(),
-        private readonly todosTable: string = process.env.TODOS_TABLE
+        private readonly todosTable: string = process.env.TODOS_TABLE,
+        private readonly todosByUserIndex = process.env.TODOS_CREATED_AT_INDEX
     ) {}
     
     async deleteTodo(todoId: string, userId: string) {
@@ -25,13 +26,12 @@ export class TodosAccess {
         const deleteParams = {
             TableName: this.todosTable,
             Key: {
-                userId,
-                todoId
+              todoId
             }
-        };
+        }
         logger.info('delete params: ' + JSON.stringify(deleteParams))
 
-        await this.docClient.delete(deleteParams).promise()
+        await this.docClient.delete(deleteParams).promise();
     }
 
     async getTodo(todoId: string): Promise<TodoItem> {
@@ -56,17 +56,14 @@ export class TodosAccess {
 
     async getAllTodosForUser(userId: string): Promise<TodoItem[]> {
         logger.info('Getting all Todos for user ' + userId)
-
         try {
             var getAllTodosParams = {
-                KeyConditionExpression: '#userId = :userId',
-                ExpressionAttributeNames: {
-                    "#userId": "userId"
-                },
+                TableName: this.todosTable,
+                IndexName: this.todosByUserIndex,
+                KeyConditionExpression: 'userId = :userId',
                 ExpressionAttributeValues: {
                     ':userId': userId
-                },
-                TableName: this.todosTable
+                }
             }
         
             logger.info("starting query with params " + JSON.stringify(getAllTodosParams))

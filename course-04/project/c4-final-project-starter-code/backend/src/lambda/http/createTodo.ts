@@ -19,20 +19,12 @@ export const handler = middy(
     let newTodoItem = await createTodo(userId, newTodoRequest)
     logger.info("created item: " + JSON.stringify(newTodoItem))
 
-    delete newTodoItem.userId
-    
-    if (newTodoItem.attachmentUrl == undefined) {
-      newTodoItem.attachmentUrl = ""
-    }
-    const returnItem = {
-      "item": newTodoItem
-    }
-
-    logger.info("RETURNING item: " + JSON.stringify(returnItem))
     return {
-      statusCode: 200,
+      statusCode: 201,
       body: JSON.stringify({
-        items: returnItem
+        item: {
+          ...newTodoItem
+        }
       })
     }
   })

@@ -20,7 +20,7 @@ export const handler = middy(
     deleteTodo(todoId, userId)
     
     return {
-      statusCode: 201,
+      statusCode: 200,
       body: ""
     }
   }
