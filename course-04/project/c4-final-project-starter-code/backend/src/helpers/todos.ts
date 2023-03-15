@@ -5,6 +5,7 @@ import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
+import { TodoUpdate } from '../models/TodoUpdate';
 //import * as createError from 'http-errors'
 
 // TODO: Implement businessLogic
@@ -42,17 +43,20 @@ export async function updateTodo(userId: string, todoId: string, request: Update
         logger.error("todo item " + todoId + " does not belong to user " + userId)
         return undefined
     }
-    const currentItem: TodoItem = await todosAccess.getTodo(todoId)
 
-    return await todosAccess.createTodo({
-        "userId": userId,
-        "todoId": todoId,
-        "createdAt": currentItem.createdAt,
-        "name": request.name,
-        "dueDate": request.dueDate,
-        "done": request.done,
-        "attachmentUrl": currentItem.attachmentUrl
-    })
+    await todosAccess.updateTodo(todoId, request as TodoUpdate)
+
+//    const currentItem: TodoItem = await todosAccess.getTodo(todoId)
+
+//     return await todosAccess.createTodo({
+//         "userId": userId,
+//         "todoId": todoId,
+//         "createdAt": currentItem.createdAt,
+//         "name": request.name,
+//         "dueDate": request.dueDate,
+//         "done": request.done,
+//         "attachmentUrl": currentItem.attachmentUrl
+//     })
 }
 
 export async function deleteTodo(todoId: string, userId: string) {
@@ -66,7 +70,7 @@ export async function deleteTodo(todoId: string, userId: string) {
     return todosAccess.deleteTodo(todoId, userId)
 }
 
-export async function createAttachmentPresignedUrl(todoId: string, userId: string): Promise<string> {
+export async function createAttachmentPresignedUrlAndUpdateItem(todoId: string, userId: string): Promise<string> {
     logger.info("getting upload URL for todo " + todoId)
 
     if (!doesItemBelongToUser(todoId, userId)) {
@@ -74,17 +78,20 @@ export async function createAttachmentPresignedUrl(todoId: string, userId: strin
         return undefined
     }
 
-    return attachmentUtils.getUploadURL(todoId)
+    const url: string = await attachmentUtils.getUploadURL(todoId)
+    logger.info("presigned url generated: " + url)
+    todosAccess.updateAttachmentURL(todoId, url.split("?")[0])
+    return url
 }
 
 async function doesItemBelongToUser(todoId: string, userId: string): Promise<boolean> {
     logger.info("checking if todo item " + todoId + " belongs to user " + userId)
-    const currentItem: TodoItem = await todosAccess.getTodo(todoId)
-    if (currentItem == undefined) {
+    const item: TodoItem = await todosAccess.getTodo(todoId)
+    if (item == undefined) {
         logger.error("error getting todo item " + todoId)
         return false
     }
 
     logger.info("todo item " + todoId + " belongs to user " + userId)
-    return currentItem.userId == userId
+    return item.userId == userId
 }

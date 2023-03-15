@@ -4,7 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { createAttachmentPresignedUrl } from '../../helpers/todos'
+import { createAttachmentPresignedUrlAndUpdateItem } from '../../helpers/todos'
 import { getUserId } from '../utils'
 import { createLogger } from '../../utils/logger'
 
@@ -17,11 +17,14 @@ export const handler = middy(
     const userId = getUserId(event)
     // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
     
-    const url: string = await createAttachmentPresignedUrl(todoId, userId)
+    const url: string = await createAttachmentPresignedUrlAndUpdateItem(todoId, userId)
 
     return {
-      statusCode: 201,
-      body: url
+      statusCode: 200,
+      body: JSON.stringify(
+        {
+          "uploadUrl": url
+        })
     }
   }
 )

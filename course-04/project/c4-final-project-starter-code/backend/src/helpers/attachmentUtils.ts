@@ -3,7 +3,7 @@ import * as AWSXRay from 'aws-xray-sdk'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
-// TODO: Implement the fileStogare logic
+// TODO: Implement the fileStorage logic
 
 export class AttachmentUtils {
     constructor(
@@ -11,7 +11,7 @@ export class AttachmentUtils {
         private readonly s3 = new XAWS.S3({
             signatureVersion: 'v4'
           }),
-    private readonly urlExpiration = process.env.SIGNED_URL_EXPIRATION
+    private readonly urlExpiration = Number(process.env.SIGNED_URL_EXPIRATION)
     ) {}
 
     async getUploadURL(todoId: string): Promise<string> {
