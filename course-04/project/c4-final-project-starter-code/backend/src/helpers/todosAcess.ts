@@ -1,18 +1,12 @@
 import * as AWS from 'aws-sdk'
-//import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate'
-//import { TodoUpdate } from '../models/TodoUpdate';
 
 const AWSXRay = require('aws-xray-sdk')
 const XAWS = AWSXRay.captureAWS(AWS)
-
-
 const logger = createLogger('TodosAccess')
-
-// TODO: Implement the dataLayer logic
 
 export class TodosAccess {
     constructor(
@@ -30,6 +24,7 @@ export class TodosAccess {
               todoId
             }
         }
+
         logger.info('delete params: ' + JSON.stringify(deleteParams))
 
         await this.docClient.delete(deleteParams).promise();
@@ -52,11 +47,14 @@ export class TodosAccess {
             return undefined
         }
 
+        logger.info('received todo ' + JSON.stringify(item))
+
         return item as TodoItem
     }
 
     async getAllTodosForUser(userId: string): Promise<TodoItem[]> {
         logger.info('Getting all Todos for user ' + userId)
+        
         try {
             var getAllTodosParams = {
                 TableName: this.todosTable,
@@ -73,6 +71,7 @@ export class TodosAccess {
             const items = result.Items
 
             logger.info("query returned " + items.length + " results")
+
             return items as TodoItem[]
         } catch (error) {
             logger.error(error)
@@ -91,6 +90,7 @@ export class TodosAccess {
     }
       
     async updateTodo(todoId: string, todoUpdate: TodoUpdate) {
+        logger.info('updating Todo ' + todoId)
 
         const updateParams = {
             TableName: this.todosTable,
@@ -110,11 +110,12 @@ export class TodosAccess {
 
         await this.docClient.update(updateParams).promise()
       
-        logger.info('Todo ' + todoId + ' was updates')
+        logger.info('Todo ' + todoId + ' was updated')
     }
 
     async updateAttachmentURL(todoId: string, url: string) {
         logger.info('adding Attachment URL ' + url + ' to Todo ' + todoId)
+        
         const updateParams = {
             TableName: this.todosTable,
             Key: {

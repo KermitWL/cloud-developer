@@ -1,9 +1,9 @@
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
+import { createLogger } from '../utils/logger'
 
 const XAWS = AWSXRay.captureAWS(AWS)
-
-// TODO: Implement the fileStorage logic
+const logger = createLogger('File storage logic')
 
 export class AttachmentUtils {
     constructor(
@@ -15,6 +15,8 @@ export class AttachmentUtils {
     ) {}
 
     async getUploadURL(todoId: string): Promise<string> {
+        logger.info("getting presigned url for todo " + todoId)
+        
         return this.s3.getSignedUrl('putObject', {
             Bucket: this.bucketName,
             Key: todoId,

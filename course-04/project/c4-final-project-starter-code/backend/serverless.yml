@@ -1,4 +1,3 @@
-# Done TODO: Change the name of the org 
 org: kermitorg
 app: serverless-todo-app
 service: serverless-todo-app
@@ -32,16 +31,6 @@ provider:
     # Enable API Gateway logs
     restApi: true
 
-  iam:
-    role:
-      statements:
-        - Effect: Allow
-          Action:
-            - xray:PutTelemetryRecords
-            - xray:PutTraceSegments
-          Resource: "*"
-
-
 functions:
 
   Auth:
@@ -62,19 +51,25 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: !GetAtt TodosTable.Arn #arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: !GetAtt TodosTable.Arn
       - Effect: Allow
         Action:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:us-east-1:622075958988:table/Todos-dev/index/CreatedAtIndex
-      #- Effect: Allow
-      #  Action:
-      #    - dynamodb:GetItem
-      #  Resource: !GetAtt arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
-        - xray:PutTraceSegments
-        Resource: "*"
+          - xray:GetSamplingRules
+          - xray:GetSamplingTargets
+          - xray:GetSamplingStatisticSummaries
+          - xray:BatchGetTraces
+          - xray:GetServiceGraph
+          - xray:GetTraceGraph
+          - xray:GetTraceSummaries
+          - xray:GetGroups
+          - xray:GetGroup
+          - xray:PutTraceSegments
+        Resource:
+          - '*'
 
   # done TODO: Configure this function - 
   # Provide iamRoleStatements property. Decide the Actions and AWS Resource. 
@@ -96,7 +91,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
-        Resource: !GetAtt TodosTable.Arn #arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: !GetAtt TodosTable.Arn
       - Effect: Allow
         Action:
         - xray:PutTraceSegments
@@ -121,11 +116,21 @@ functions:
         Action:
           - dynamodb:UpdateItem
           - dynamodb:getItem
-        Resource: !GetAtt TodosTable.Arn #arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: !GetAtt TodosTable.Arn 
       - Effect: Allow
         Action:
-        - xray:PutTraceSegments
-        Resource: "*"
+          - xray:GetSamplingRules
+          - xray:GetSamplingTargets
+          - xray:GetSamplingStatisticSummaries
+          - xray:BatchGetTraces
+          - xray:GetServiceGraph
+          - xray:GetTraceGraph
+          - xray:GetTraceSummaries
+          - xray:GetGroups
+          - xray:GetGroup
+          - xray:PutTraceSegments
+        Resource:
+          - '*'
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
@@ -143,11 +148,21 @@ functions:
         Action:
           - dynamodb:GetItem
           - dynamodb:DeleteItem
-        Resource: !GetAtt TodosTable.Arn #arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: !GetAtt TodosTable.Arn 
       - Effect: Allow
         Action:
-        - xray:PutTraceSegments
-        Resource: "*"
+          - xray:GetSamplingRules
+          - xray:GetSamplingTargets
+          - xray:GetSamplingStatisticSummaries
+          - xray:BatchGetTraces
+          - xray:GetServiceGraph
+          - xray:GetTraceGraph
+          - xray:GetTraceSummaries
+          - xray:GetGroups
+          - xray:GetGroup
+          - xray:PutTraceSegments
+        Resource:
+          - '*'
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
@@ -170,13 +185,24 @@ functions:
         Action:
           - dynamodb:UpdateItem
           - dynamodb:getItem
-        Resource: !GetAtt TodosTable.Arn #arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: !GetAtt TodosTable.Arn
+      - Effect: Allow
+        Action:
+          - xray:GetSamplingRules
+          - xray:GetSamplingTargets
+          - xray:GetSamplingStatisticSummaries
+          - xray:BatchGetTraces
+          - xray:GetServiceGraph
+          - xray:GetTraceGraph
+          - xray:GetTraceSummaries
+          - xray:GetGroups
+          - xray:GetGroup
+          - xray:PutTraceSegments
+        Resource:
+          - '*'
 
 resources:
   Resources:
-    # Add necessary AWS resources. You will need at least the following AWS resources
-    # TODO: Fill the properties
-    # Feel free to change the names as you like. 
     GatewayResponseDefault4XX:
       Type: AWS::ApiGateway::GatewayResponse
       Properties:
@@ -199,19 +225,9 @@ resources:
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
-#          - AttributeName: name
-#            AttributeType: S
-#          - AttributeName: dueDate
-#            AttributeType: S
-#          - AttributeName: done
-#            AttributeType: B
-#          - AttributeName: attachmentUrl
-#            AttributeType: S
         KeySchema:
-#          - AttributeName: userId
-#            KeyType: HASH
+        # composite key in *secondary* index
           - AttributeName: todoId
-#            KeyType: RANGE
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
