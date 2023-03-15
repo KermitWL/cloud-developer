@@ -21,22 +21,37 @@ export class TodosAccess {
         const deleteParams = {
             TableName: this.todosTable,
             Key: {
-              todoId
+                userId,
+                todoId
             }
         }
+
+        // const deleteParams = {
+        //     TableName: this.todosTable,
+        //     Key: {
+        //         todoId,
+        //         userId
+        //     },
+        //     ConditionExpression: "userId = :userId and todoId = :todoId",
+        //     ExpressionAttributeValues: {
+        //       ":todoId": todoId,
+        //       ":userId": userId
+        //     }
+        //   }
 
         logger.info('delete params: ' + JSON.stringify(deleteParams))
 
         await this.docClient.delete(deleteParams).promise();
     }
 
-    async getTodo(todoId: string): Promise<TodoItem> {
+    async getTodo(userId: string, todoId: string): Promise<TodoItem> {
         logger.info('Getting todo ' + todoId)
 
         const params = {
             TableName: this.todosTable,
             Key: {
-                "todoId": todoId
+                userId,
+                todoId
             }
         };
 
@@ -89,22 +104,23 @@ export class TodosAccess {
         return newTodo
     }
       
-    async updateTodo(todoId: string, todoUpdate: TodoUpdate) {
+    async updateTodo(userId: string, todoId: string, todoUpdate: TodoUpdate) {
         logger.info('updating Todo ' + todoId)
 
         const updateParams = {
             TableName: this.todosTable,
             Key: {
-              todoId
+                userId,
+                todoId
             },
             UpdateExpression: 'set #name = :name, dueDate = :dueDate, done = :done',
             ExpressionAttributeNames: {
-              '#name': 'name'
+                '#name': 'name'
             },
             ExpressionAttributeValues: {
-              ':name': todoUpdate.name,
-              ':dueDate': todoUpdate.dueDate,
-              ':done': todoUpdate.done
+                ':name': todoUpdate.name,
+                ':dueDate': todoUpdate.dueDate,
+                ':done': todoUpdate.done
             }
         }
 
@@ -113,12 +129,13 @@ export class TodosAccess {
         logger.info('Todo ' + todoId + ' was updated')
     }
 
-    async updateAttachmentURL(todoId: string, url: string) {
+    async updateAttachmentURL(userId: string, todoId: string, url: string) {
         logger.info('adding Attachment URL ' + url + ' to Todo ' + todoId)
-        
+
         const updateParams = {
             TableName: this.todosTable,
             Key: {
+                userId,
                 todoId
             },
             UpdateExpression: 'set attachmentUrl = :attachmentUrl',

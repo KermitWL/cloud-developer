@@ -41,7 +41,7 @@ export async function updateTodo(userId: string, todoId: string, request: Update
         return undefined
     }
 
-    await todosAccess.updateTodo(todoId, request as TodoUpdate)
+    await todosAccess.updateTodo(userId, todoId, request as TodoUpdate)
 }
 
 export async function deleteTodo(todoId: string, userId: string) {
@@ -65,7 +65,7 @@ export async function createAttachmentPresignedUrlAndUpdateItem(todoId: string, 
 
     const url: string = await attachmentUtils.getUploadURL(todoId)
     logger.info("presigned url generated: " + url)
-    todosAccess.updateAttachmentURL(todoId, url.split("?")[0])
+    todosAccess.updateAttachmentURL(userId, todoId, url.split("?")[0])
 
     return url
 }
@@ -73,13 +73,13 @@ export async function createAttachmentPresignedUrlAndUpdateItem(todoId: string, 
 async function doesItemBelongToUser(todoId: string, userId: string): Promise<boolean> {
     logger.info("checking if todo item " + todoId + " belongs to user " + userId)
 
-    const item: TodoItem = await todosAccess.getTodo(todoId)
+    const item: TodoItem = await todosAccess.getTodo(userId, todoId)
     if (item == undefined) {
         logger.error("error getting todo item " + todoId)
         return false
     }
 
     logger.info("todo item " + todoId + " belongs to user " + userId)
-    
+
     return item.userId == userId
 }
